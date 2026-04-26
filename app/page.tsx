@@ -57,13 +57,15 @@ export default function Home() {
             <ArrowRight strokeWidth={3} size={28} className="group-hover:translate-x-2 transition-transform" />
           </motion.button></Link>
 
-          <motion.button 
-            whileHover={{ scale: 1.05, rotate: 2 }}
-            whileTap={{ scale: 0.95, y: 5, boxShadow: "0px 0px 0px 0px rgba(0,0,0,1)" }}
-            className="bg-white text-black px-12 py-6 rounded-2xl border-4 border-foreground text-2xl font-black uppercase tracking-widest shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.9)] transition-all"
-          >
-            How It Works
-          </motion.button>
+          <Link href="/how-it-works">
+            <motion.button 
+              whileHover={{ scale: 1.05, rotate: 2 }}
+              whileTap={{ scale: 0.95, y: 5, boxShadow: "0px 0px 0px 0px rgba(0,0,0,1)" }}
+              className="bg-white text-black px-12 py-6 rounded-2xl border-4 border-foreground text-2xl font-black uppercase tracking-widest shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.9)] transition-all"
+            >
+              How It Works
+            </motion.button>
+          </Link>
         </motion.div>
       </div>
 

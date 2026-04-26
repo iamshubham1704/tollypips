@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { BrainCircuit, FileSignature, CalendarClock, ExternalLink, Wrench } from 'lucide-react';
+import { BrainCircuit, FileSignature, CalendarClock, ExternalLink, Wrench, HelpCircle } from 'lucide-react';
 
 const tools = [
   {
@@ -17,10 +17,11 @@ const tools = [
   {
     id: 'pdf-editor',
     title: 'PDF Editor',
-    description: 'Quickly modify, merge, and split PDF documents right in your browser. No server uploads required.',
+    description: 'Add text, images, and redact content from PDFs right in your browser. No server uploads required.',
     icon: FileSignature,
     color: 'bg-pink-400',
-    status: 'Coming Soon',
+    link: '/tools/pdf-editor',
+    status: 'Available',
   },
   {
     id: 'attendance-manager',
@@ -29,6 +30,14 @@ const tools = [
     icon: CalendarClock,
     color: 'bg-green-400',
     status: 'Coming Soon',
+  },
+  {
+    id: 'secret-tool',
+    title: 'Mystery Tool',
+    description: 'We are cooking up something extremely helpful. Stay tuned to find out what it is!',
+    icon: HelpCircle,
+    color: 'bg-purple-400',
+    status: 'Revealing Soon',
   }
 ];
 
@@ -97,13 +106,13 @@ export default function ToolsPage() {
                 rotate: index % 2 === 0 ? 1 : -1,
                 y: tool.status === 'Available' ? -5 : 0
               }}
-              className={`group relative p-8 rounded-3xl border-4 border-foreground ${tool.color} shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.9)] flex flex-col transition-all duration-300 overflow-hidden ${tool.status === 'Coming Soon' ? 'opacity-80 grayscale-20' : ''}`}
+              className={`group relative p-8 rounded-3xl border-4 border-foreground ${tool.color} shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.9)] flex flex-col transition-all duration-300 overflow-hidden ${tool.status !== 'Available' ? 'opacity-80 grayscale-20' : ''}`}
             >
               
-              {/* Coming Soon Overlay Style for the card */}
-              {tool.status === 'Coming Soon' && (
+              {/* Status Overlay Style for the card */}
+              {tool.status !== 'Available' && (
                 <div className="absolute -right-12 top-8 bg-black text-white font-black uppercase tracking-widest py-2 px-14 rotate-45 border-y-4 border-foreground/50 shadow-lg z-10 text-sm">
-                  Coming Soon
+                  {tool.status}
                 </div>
               )}
 
@@ -136,7 +145,7 @@ export default function ToolsPage() {
                   disabled
                   className="w-full bg-black/10 text-black/50 px-6 py-4 rounded-xl border-4 border-black/20 text-xl font-black uppercase tracking-widest cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  In Development
+                  {tool.status === 'Coming Soon' ? 'In Development' : 'Stay Tuned'}
                 </button>
               )}
               
