@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Bangers } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import { Analytics } from "@vercel/analytics/react";
 
 const bangersFont = Bangers({
   weight: "400",
@@ -29,6 +30,7 @@ export default function RootLayout({
         <main className="grow pt-[80px]">
           {children}
         </main>
+        <Analytics />
       </body>
     </html>
   );
