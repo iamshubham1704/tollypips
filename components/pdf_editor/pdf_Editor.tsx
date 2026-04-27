@@ -16,11 +16,16 @@ import {
   ZoomOut,
   Trash2,
   X,
+  Undo2,
+  Redo2,
+  RotateCcw,
 } from "lucide-react";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+
+const generateId = () => Math.random().toString(36).substring(2, 11);
 
 // --- Types ---
 type ToolMode = "cursor" | "text" | "image" | "whiteout";
@@ -66,25 +71,30 @@ function ToolBtn({
   children,
   label,
   color = "bg-white",
+  disabled = false,
 }: {
   active?: boolean;
   onClick: () => void;
   children: React.ReactNode;
   label: string;
   color?: string;
+  disabled?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
       title={label}
-      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-3 border-black font-black uppercase tracking-wider text-sm transition-all duration-200 ${
-        active
+      disabled={disabled}
+      className={`shrink-0 flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl border-3 border-black font-black uppercase tracking-wider text-xs md:text-sm transition-all duration-200 ${
+        disabled
+          ? "opacity-50 cursor-not-allowed bg-gray-200 text-gray-500 shadow-none border-gray-500"
+          : active
           ? "bg-pink-400 text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] -translate-y-0.5"
           : `${color} text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5`
       }`}
     >
       {children}
-      <span className="hidden md:inline">{label}</span>
+      {label && <span className="hidden md:inline">{label}</span>}
     </button>
   );
 }
@@ -95,9 +105,13 @@ export default function PdfEditor() {
   const [fileBytes, setFileBytes] = useState<ArrayBuffer | null>(null);
   const [numPages, setNumPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [scale, setScale] = useState(1.2);
+  const [scale, setScale] = useState(() => {
+    if (typeof window !== "undefined" && window.innerWidth < 768) return 0.6;
+    return 1.2;
+  });
   const [tool, setTool] = useState<ToolMode>("cursor");
   const [annotations, setAnnotations] = useState<Annotation[]>([]);
+
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [drawStart, setDrawStart] = useState<{ x: number; y: number } | null>(null);
@@ -109,41 +123,105 @@ export default function PdfEditor() {
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [isResizing, setIsResizing] = useState(false);
   const [resizeCorner, setResizeCorner] = useState<string | null>(null);
-  const [resizeStart, setResizeStart] = useState<{ x: number; y: number; w: number; h: number; ax: number; ay: number } | null>(null);
+  const [resizeStart, setResizeStart] = useState<{ x: number; y: number; w: number; h: number; ax: number; ay: number; fontSize?: number } | null>(null);
+
+  // --- Pinch-to-Zoom Refs ---
+  const initialPinchDist = useRef<number | null>(null);
+  const initialFontSize = useRef<number | null>(null);
+
+  // --- Undo / Redo State ---
+  const [history, setHistory] = useState<Annotation[][]>([[]]);
+  const [historyStep, setHistoryStep] = useState(0);
+  const historyRef = useRef<Annotation[][]>([[]]);
+  const historyStepRef = useRef<number>(0);
+
+  useEffect(() => {
+    historyRef.current = history;
+    historyStepRef.current = historyStep;
+  }, [history, historyStep]);
+
+  const commitAnnotations = useCallback((nextState: Annotation[]) => {
+    const currentHistory = historyRef.current;
+    const currentStep = historyStepRef.current;
+    if (JSON.stringify(currentHistory[currentStep]) === JSON.stringify(nextState)) return;
+    const newHistory = currentHistory.slice(0, currentStep + 1);
+    newHistory.push(nextState);
+    setHistory(newHistory);
+    setHistoryStep(currentStep + 1);
+  }, []);
+
+  const setAnnotationsAndCommit = useCallback((action: React.SetStateAction<Annotation[]>) => {
+    setAnnotations((prev) => {
+      const next = typeof action === 'function' ? action(prev) : action;
+      setTimeout(() => commitAnnotations(next), 0);
+      return next;
+    });
+  }, [commitAnnotations]);
+
+  const handleUndo = useCallback(() => {
+    if (historyStepRef.current > 0) {
+      const newStep = historyStepRef.current - 1;
+      setHistoryStep(newStep);
+      setAnnotations(historyRef.current[newStep]);
+      setSelectedId(null);
+      setEditingId(null);
+    }
+  }, []);
+
+  const handleRedo = useCallback(() => {
+    if (historyStepRef.current < historyRef.current.length - 1) {
+      const newStep = historyStepRef.current + 1;
+      setHistoryStep(newStep);
+      setAnnotations(historyRef.current[newStep]);
+      setSelectedId(null);
+      setEditingId(null);
+    }
+  }, []);
+
+  const clearAll = useCallback(() => {
+    setAnnotationsAndCommit([]);
+    setSelectedId(null);
+    setEditingId(null);
+  }, [setAnnotationsAndCommit]);
+  // -------------------------
 
   const pageWrapperRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   // File upload
-  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (f && f.type === "application/pdf") {
       setFile(f);
       f.arrayBuffer().then((buf) => setFileBytes(buf));
       setAnnotations([]);
+      setHistory([[]]);
+      setHistoryStep(0);
       setCurrentPage(1);
       setSelectedId(null);
     }
-  }, []);
+  };
 
   // Drop handler
-  const handleDrop = useCallback((e: React.DragEvent) => {
+  const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     const f = e.dataTransfer.files[0];
     if (f && f.type === "application/pdf") {
       setFile(f);
       f.arrayBuffer().then((buf) => setFileBytes(buf));
       setAnnotations([]);
+      setHistory([[]]);
+      setHistoryStep(0);
       setCurrentPage(1);
     }
-  }, []);
+  };
 
   const onDocumentLoadSuccess = useCallback(({ numPages: n }: { numPages: number }) => {
     setNumPages(n);
   }, []);
 
   // Get click position relative to the page canvas
-  const getRelPos = (e: React.MouseEvent) => {
+  const getRelPos = (e: React.PointerEvent) => {
     const rect = pageWrapperRef.current?.querySelector(".react-pdf__Page")?.getBoundingClientRect();
     if (!rect) return null;
     return { x: e.clientX - rect.left, y: e.clientY - rect.top };
@@ -151,12 +229,12 @@ export default function PdfEditor() {
 
   // Stop editing and remove the annotation if its text is empty
   const stopEditing = useCallback(() => {
-    setAnnotations((prev) => prev.filter((a) => !(a.type === "text" && (a as TextAnnotation).text.trim() === "")));
+    setAnnotationsAndCommit((prev) => prev.filter((a) => !(a.type === "text" && (a as TextAnnotation).text.trim() === "")));
     setEditingId(null);
-  }, []);
+  }, [setAnnotationsAndCommit, setEditingId]);
 
   // --- Page overlay click ---
-  const handleOverlayMouseDown = (e: React.MouseEvent) => {
+  const handleOverlayPointerDown = (e: React.PointerEvent) => {
     const pos = getRelPos(e);
     if (!pos) return;
 
@@ -164,7 +242,7 @@ export default function PdfEditor() {
     stopEditing();
 
     if (tool === "text") {
-      const id = `text-${crypto.randomUUID()}`;
+      const id = `text-${generateId()}`;
       setAnnotations((prev) => [
         // filter out empty texts from previous clicks
         ...prev.filter((a) => !(a.type === "text" && (a as TextAnnotation).text.trim() === "")),
@@ -193,7 +271,7 @@ export default function PdfEditor() {
     }
   };
 
-  const handleOverlayMouseMove = (e: React.MouseEvent) => {
+  const handleOverlayPointerMove = (e: React.PointerEvent) => {
     if (tool === "whiteout" && drawStart && !isDragging && !isResizing) {
       const pos = getRelPos(e);
       if (pos) setDrawCurrent(pos);
@@ -205,17 +283,29 @@ export default function PdfEditor() {
       const dy = pos.y - resizeStart.y;
       setAnnotations((prev) =>
         prev.map((a) => {
-          if (a.id !== selectedId || a.type !== "image") return a;
-          const img = a as ImageAnnotation;
-          let newW = resizeStart.w;
-          let newH = resizeStart.h;
-          let newX = resizeStart.ax;
-          let newY = resizeStart.ay;
-          if (resizeCorner === "se") { newW = Math.max(30, resizeStart.w + dx); newH = Math.max(30, resizeStart.h + dy); }
-          else if (resizeCorner === "sw") { newW = Math.max(30, resizeStart.w - dx); newH = Math.max(30, resizeStart.h + dy); newX = resizeStart.ax + (resizeStart.w - newW); }
-          else if (resizeCorner === "ne") { newW = Math.max(30, resizeStart.w + dx); newH = Math.max(30, resizeStart.h - dy); newY = resizeStart.ay + (resizeStart.h - newH); }
-          else if (resizeCorner === "nw") { newW = Math.max(30, resizeStart.w - dx); newH = Math.max(30, resizeStart.h - dy); newX = resizeStart.ax + (resizeStart.w - newW); newY = resizeStart.ay + (resizeStart.h - newH); }
-          return { ...img, x: newX, y: newY, width: newW, height: newH };
+          if (a.id !== selectedId) return a;
+          if (a.type === "image") {
+            const img = a as ImageAnnotation;
+            let newW = resizeStart.w;
+            let newH = resizeStart.h;
+            let newX = resizeStart.ax;
+            let newY = resizeStart.ay;
+            if (resizeCorner === "se") { newW = Math.max(30, resizeStart.w + dx); newH = Math.max(30, resizeStart.h + dy); }
+            else if (resizeCorner === "sw") { newW = Math.max(30, resizeStart.w - dx); newH = Math.max(30, resizeStart.h + dy); newX = resizeStart.ax + (resizeStart.w - newW); }
+            else if (resizeCorner === "ne") { newW = Math.max(30, resizeStart.w + dx); newH = Math.max(30, resizeStart.h - dy); newY = resizeStart.ay + (resizeStart.h - newH); }
+            else if (resizeCorner === "nw") { newW = Math.max(30, resizeStart.w - dx); newH = Math.max(30, resizeStart.h - dy); newX = resizeStart.ax + (resizeStart.w - newW); newY = resizeStart.ay + (resizeStart.h - newH); }
+            return { ...img, x: newX, y: newY, width: newW, height: newH };
+          } else if (a.type === "text") {
+            const txt = a as TextAnnotation;
+            let dSize = 0;
+            if (resizeCorner === "se") dSize = dy;
+            else if (resizeCorner === "sw") dSize = dy;
+            else if (resizeCorner === "ne") dSize = -dy;
+            else if (resizeCorner === "nw") dSize = -dy;
+            const newSize = Math.max(8, (resizeStart.fontSize || 16) + dSize * 0.5);
+            return { ...txt, fontSize: newSize };
+          }
+          return a;
         })
       );
       return;
@@ -231,20 +321,22 @@ export default function PdfEditor() {
     }
   };
 
-  const handleOverlayMouseUp = () => {
+  const handleOverlayPointerUp = () => {
     if (tool === "whiteout" && drawStart && drawCurrent) {
       const x = Math.min(drawStart.x, drawCurrent.x);
       const y = Math.min(drawStart.y, drawCurrent.y);
       const w = Math.abs(drawCurrent.x - drawStart.x);
       const h = Math.abs(drawCurrent.y - drawStart.y);
       if (w > 5 && h > 5) {
-        setAnnotations((prev) => [
+        setAnnotationsAndCommit((prev) => [
           ...prev,
-          { id: `wo-${crypto.randomUUID()}`, type: "whiteout", x, y, width: w, height: h, page: currentPage },
+          { id: `wo-${generateId()}`, type: "whiteout", x, y, width: w, height: h, page: currentPage },
         ]);
       }
       setDrawStart(null);
       setDrawCurrent(null);
+    } else if (isDragging || isResizing) {
+      setAnnotationsAndCommit((prev) => prev);
     }
     setIsDragging(false);
     setIsResizing(false);
@@ -263,10 +355,10 @@ export default function PdfEditor() {
       img.onload = () => {
         const maxW = 200;
         const ratio = img.height / img.width;
-        setAnnotations((prev) => [
+        setAnnotationsAndCommit((prev) => [
           ...prev,
           {
-            id: `img-${crypto.randomUUID()}`,
+            id: `img-${generateId()}`,
             type: "image",
             x: pos.x,
             y: pos.y,
@@ -284,7 +376,7 @@ export default function PdfEditor() {
   };
 
   // Annotation click (select/drag) — works in any tool mode
-  const handleAnnotationMouseDown = (e: React.MouseEvent, ann: Annotation) => {
+  const handleAnnotationPointerDown = (e: React.PointerEvent, ann: Annotation) => {
     e.stopPropagation();
 
     // If we're already editing this annotation's text, don't interfere
@@ -307,7 +399,7 @@ export default function PdfEditor() {
   };
 
   // Resize handle mousedown
-  const handleResizeMouseDown = (e: React.MouseEvent, ann: ImageAnnotation, corner: string) => {
+  const handleResizePointerDown = (e: React.PointerEvent, ann: ImageAnnotation | TextAnnotation, corner: string) => {
     e.stopPropagation();
     e.preventDefault();
     setSelectedId(ann.id);
@@ -315,22 +407,68 @@ export default function PdfEditor() {
     setResizeCorner(corner);
     const pos = getRelPos(e);
     if (pos) {
-      setResizeStart({ x: pos.x, y: pos.y, w: ann.width, h: ann.height, ax: ann.x, ay: ann.y });
+      if (ann.type === "image") {
+        setResizeStart({ x: pos.x, y: pos.y, w: ann.width, h: ann.height, ax: ann.x, ay: ann.y });
+      } else {
+        setResizeStart({ x: pos.x, y: pos.y, w: 0, h: 0, ax: ann.x, ay: ann.y, fontSize: ann.fontSize });
+      }
+    }
+  };
+
+  const handleTextTouchStart = (e: React.TouchEvent, ann: TextAnnotation) => {
+    if (e.touches.length === 2) {
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      const dist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+      initialPinchDist.current = dist;
+      initialFontSize.current = ann.fontSize;
+      setSelectedId(ann.id);
+      e.stopPropagation();
+    }
+  };
+
+  const handleTextTouchMove = (e: React.TouchEvent, ann: TextAnnotation) => {
+    if (e.touches.length === 2 && initialPinchDist.current && initialFontSize.current) {
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      const dist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+      const scale = dist / initialPinchDist.current;
+      const newSize = Math.max(8, initialFontSize.current * scale);
+      setAnnotations(prev => prev.map(a => a.id === ann.id ? { ...a, fontSize: newSize } : a));
+      e.stopPropagation();
+    }
+  };
+
+  const handleTextTouchEnd = (e: React.TouchEvent) => {
+    if (e.touches.length < 2 && initialPinchDist.current) {
+      initialPinchDist.current = null;
+      setAnnotationsAndCommit(prev => prev);
     }
   };
 
   // Delete selected
   const deleteSelected = useCallback(() => {
     if (selectedId) {
-      setAnnotations((prev) => prev.filter((a) => a.id !== selectedId));
+      setAnnotationsAndCommit((prev) => prev.filter((a) => a.id !== selectedId));
       setSelectedId(null);
       setEditingId(null);
     }
-  }, [selectedId]);
+  }, [selectedId, setAnnotationsAndCommit, setSelectedId, setEditingId]);
 
   // Keyboard
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
+        e.preventDefault();
+        if (e.shiftKey) handleRedo();
+        else handleUndo();
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") {
+        e.preventDefault();
+        handleRedo();
+        return;
+      }
       if (e.key === "Delete" || e.key === "Backspace") {
         if (editingId) return; // don't delete while typing
         deleteSelected();
@@ -343,7 +481,7 @@ export default function PdfEditor() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [deleteSelected, editingId, stopEditing]);
+  }, [deleteSelected, editingId, stopEditing, handleUndo, handleRedo]);
 
   // --- EXPORT ---
   const handleExport = async () => {
@@ -454,7 +592,7 @@ export default function PdfEditor() {
   return (
     <div className="flex flex-col h-[calc(100vh-80px)] bg-background overflow-hidden">
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b-4 border-foreground bg-green-200 dark:bg-green-900/40">
+      <div className="flex overflow-x-auto items-center gap-2 px-2 md:px-4 py-2 md:py-3 border-b-4 border-foreground bg-green-200 dark:bg-green-900/40 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {/* Tool Modes */}
         <ToolBtn active={tool === "cursor"} onClick={() => setTool("cursor")} label="Select">
           <MousePointer2 size={18} strokeWidth={2.5} />
@@ -469,7 +607,7 @@ export default function PdfEditor() {
           <Eraser size={18} strokeWidth={2.5} />
         </ToolBtn>
 
-        <div className="w-px h-8 bg-foreground/30 mx-1" />
+        <div className="shrink-0 w-px h-8 bg-foreground/30 mx-1" />
 
         {/* Text Options (visible when text tool active) */}
         {tool === "text" && (
@@ -489,7 +627,7 @@ export default function PdfEditor() {
               type="color"
               value={textColor}
               onChange={(e) => setTextColor(e.target.value)}
-              className="w-9 h-9 rounded-lg border-3 border-black cursor-pointer"
+              className="shrink-0 w-9 h-9 rounded-lg border-3 border-black cursor-pointer"
             />
           </div>
         )}
@@ -503,18 +641,31 @@ export default function PdfEditor() {
 
         <div className="grow" />
 
+        {/* Undo / Redo */}
+        <ToolBtn onClick={handleUndo} label="Undo" disabled={historyStep === 0}>
+          <Undo2 size={18} strokeWidth={2.5} />
+        </ToolBtn>
+        <ToolBtn onClick={handleRedo} label="Redo" disabled={historyStep === history.length - 1}>
+          <Redo2 size={18} strokeWidth={2.5} />
+        </ToolBtn>
+        <ToolBtn onClick={clearAll} label="Clear" disabled={annotations.length === 0} color="bg-orange-300">
+          <RotateCcw size={18} strokeWidth={2.5} />
+        </ToolBtn>
+
+        <div className="shrink-0 w-px h-8 bg-foreground/30 mx-1" />
+
         {/* Zoom */}
         <ToolBtn onClick={() => setScale((s) => Math.max(0.5, s - 0.2))} label="">
           <ZoomOut size={18} strokeWidth={2.5} />
         </ToolBtn>
-        <span className="font-black text-sm text-foreground tabular-nums min-w-14 text-center">
+        <span className="shrink-0 font-black text-sm text-foreground tabular-nums min-w-14 text-center">
           {Math.round(scale * 100)}%
         </span>
         <ToolBtn onClick={() => setScale((s) => Math.min(3, s + 0.2))} label="">
           <ZoomIn size={18} strokeWidth={2.5} />
         </ToolBtn>
 
-        <div className="w-px h-8 bg-foreground/30 mx-1" />
+        <div className="shrink-0 w-px h-8 bg-foreground/30 mx-1" />
 
         {/* Export */}
         <ToolBtn onClick={handleExport} label={isExporting ? "Saving..." : "Export"} color="bg-yellow-400">
@@ -527,6 +678,8 @@ export default function PdfEditor() {
             setFile(null);
             setFileBytes(null);
             setAnnotations([]);
+            setHistory([[]]);
+            setHistoryStep(0);
           }}
           label="New"
           color="bg-blue-300"
@@ -536,14 +689,24 @@ export default function PdfEditor() {
       </div>
 
       {/* Main Canvas Area */}
-      <div className="flex-1 overflow-auto bg-[#e5e5e5] dark:bg-[#1a1a1a] flex justify-center py-8">
+      <div 
+        className="flex-1 overflow-auto bg-[#e5e5e5] dark:bg-[#1a1a1a] flex justify-center py-8"
+        onPointerDown={(e) => {
+          if (e.target === e.currentTarget) {
+            setTool("cursor");
+            setSelectedId(null);
+            stopEditing();
+          }
+        }}
+      >
         <div
           ref={pageWrapperRef}
-          className="relative inline-block shadow-[8px_8px_0px_0px_rgba(0,0,0,0.3)]"
+          className={`relative inline-block shadow-[8px_8px_0px_0px_rgba(0,0,0,0.3)] ${tool !== "cursor" ? "touch-none" : ""}`}
           style={{ cursor: tool === "text" ? "text" : tool === "whiteout" ? "crosshair" : tool === "image" ? "copy" : "default" }}
-          onMouseDown={handleOverlayMouseDown}
-          onMouseMove={handleOverlayMouseMove}
-          onMouseUp={handleOverlayMouseUp}
+          onPointerDown={handleOverlayPointerDown}
+          onPointerMove={handleOverlayPointerMove}
+          onPointerUp={handleOverlayPointerUp}
+          onPointerCancel={handleOverlayPointerUp}
         >
           <Document file={file} onLoadSuccess={onDocumentLoadSuccess}>
             <Page pageNumber={currentPage} scale={scale} />
@@ -556,8 +719,8 @@ export default function PdfEditor() {
                 return (
                   <div
                     key={ann.id}
-                    onMouseDown={(e) => handleAnnotationMouseDown(e, ann)}
-                    className={`absolute bg-white pointer-events-auto ${
+                    onPointerDown={(e) => handleAnnotationPointerDown(e, ann)}
+                    className={`absolute bg-white pointer-events-auto touch-none ${
                       selectedId === ann.id ? "ring-2 ring-pink-500 ring-offset-1" : ""
                     }`}
                     style={{ left: ann.x, top: ann.y, width: ann.width, height: ann.height }}
@@ -565,12 +728,16 @@ export default function PdfEditor() {
                 );
               }
               if (ann.type === "text") {
+                const isSelected = selectedId === ann.id;
                 return (
                   <div
                     key={ann.id}
-                    onMouseDown={(e) => handleAnnotationMouseDown(e, ann)}
-                    className={`absolute pointer-events-auto cursor-move p-1 rounded ${
-                      selectedId === ann.id ? "ring-2 ring-pink-500 ring-offset-1 bg-pink-50/30" : "hover:bg-blue-50/30"
+                    onPointerDown={(e) => handleAnnotationPointerDown(e, ann)}
+                    onTouchStart={(e) => handleTextTouchStart(e, ann as TextAnnotation)}
+                    onTouchMove={(e) => handleTextTouchMove(e, ann as TextAnnotation)}
+                    onTouchEnd={handleTextTouchEnd}
+                    className={`absolute pointer-events-auto cursor-move p-1 rounded touch-none ${
+                      isSelected ? "ring-2 ring-pink-500 ring-offset-1 bg-pink-50/30" : "hover:bg-blue-50/30"
                     }`}
                     style={{ left: ann.x - 4, top: ann.y - 4, minWidth: 30, minHeight: 20 }}
                   >
@@ -579,7 +746,7 @@ export default function PdfEditor() {
                         ref={(el) => { if (el) setTimeout(() => el.focus(), 0); }}
                         value={ann.text}
                         placeholder="Type here..."
-                        onMouseDown={(e) => e.stopPropagation()}
+                        onPointerDown={(e) => e.stopPropagation()}
                         onClick={(e) => e.stopPropagation()}
                         onChange={(e) =>
                           setAnnotations((prev) =>
@@ -609,6 +776,24 @@ export default function PdfEditor() {
                         {ann.text || "(click to edit)"}
                       </span>
                     )}
+                    {isSelected && editingId !== ann.id && (
+                      <>
+                        {["nw", "ne", "sw", "se"].map((corner) => (
+                          <div
+                            key={corner}
+                            onPointerDown={(e) => handleResizePointerDown(e, ann as TextAnnotation, corner)}
+                            className="absolute w-4 h-4 bg-pink-500 border-2 border-white rounded-full shadow-md z-20"
+                            style={{
+                              cursor: corner === "nw" || corner === "se" ? "nwse-resize" : "nesw-resize",
+                              top: corner.startsWith("n") ? -6 : undefined,
+                              bottom: corner.startsWith("s") ? -6 : undefined,
+                              left: corner.endsWith("w") ? -6 : undefined,
+                              right: corner.endsWith("e") ? -6 : undefined,
+                            }}
+                          />
+                        ))}
+                      </>
+                    )}
                   </div>
                 );
               }
@@ -617,8 +802,8 @@ export default function PdfEditor() {
                 return (
                   <div
                     key={ann.id}
-                    onMouseDown={(e) => handleAnnotationMouseDown(e, ann)}
-                    className={`absolute pointer-events-auto cursor-move rounded ${
+                    onPointerDown={(e) => handleAnnotationPointerDown(e, ann)}
+                    className={`absolute pointer-events-auto cursor-move rounded touch-none ${
                       isSelected ? "ring-2 ring-pink-500 ring-offset-2 shadow-lg" : "hover:ring-2 hover:ring-blue-400 hover:ring-offset-1"
                     }`}
                     style={{ left: ann.x, top: ann.y, width: ann.width, height: ann.height }}
@@ -636,7 +821,7 @@ export default function PdfEditor() {
                         {["nw", "ne", "sw", "se"].map((corner) => (
                           <div
                             key={corner}
-                            onMouseDown={(e) => handleResizeMouseDown(e, ann as ImageAnnotation, corner)}
+                            onPointerDown={(e) => handleResizePointerDown(e, ann as ImageAnnotation, corner)}
                             className="absolute w-5 h-5 bg-pink-500 border-2 border-white rounded-full shadow-md z-20"
                             style={{
                               cursor: corner === "nw" || corner === "se" ? "nwse-resize" : "nesw-resize",
