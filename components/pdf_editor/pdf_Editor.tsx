@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { PDFDocument, rgb, StandardFonts, PDFFont } from "pdf-lib";
 import {
   Type,
   ImagePlus,
@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
+import fontkit from "@pdf-lib/fontkit";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -37,6 +38,7 @@ interface TextAnnotation {
   y: number;
   text: string;
   fontSize: number;
+  fontFamily: "Helvetica" | "TimesRoman" | "Courier" | "Roboto" | "Montserrat" | "Poppins";
   color: string;
   page: number;
 }
@@ -118,6 +120,7 @@ export default function PdfEditor() {
   const [drawCurrent, setDrawCurrent] = useState<{ x: number; y: number } | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [textFontSize, setTextFontSize] = useState(16);
+  const [textFontFamily, setTextFontFamily] = useState<"Helvetica" | "TimesRoman" | "Courier" | "Roboto" | "Montserrat" | "Poppins">("Helvetica");
   const [textColor, setTextColor] = useState("#000000");
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -253,6 +256,7 @@ export default function PdfEditor() {
           y: pos.y,
           text: "",
           fontSize: textFontSize,
+          fontFamily: textFontFamily,
           color: textColor,
           page: currentPage,
         },
@@ -489,7 +493,31 @@ export default function PdfEditor() {
     setIsExporting(true);
     try {
       const pdfDoc = await PDFDocument.load(fileBytes);
-      const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      pdfDoc.registerFontkit(fontkit);
+
+      const fonts: Record<string, PDFFont> = {
+        Helvetica: await pdfDoc.embedFont(StandardFonts.Helvetica),
+        TimesRoman: await pdfDoc.embedFont(StandardFonts.TimesRoman),
+        Courier: await pdfDoc.embedFont(StandardFonts.Courier),
+      };
+
+      // Helper to fetch and embed custom TTF fonts
+      const loadCustomFont = async (name: string, path: string) => {
+        if (!fonts[name]) {
+          const res = await fetch(path);
+          const fontBytes = await res.arrayBuffer();
+          fonts[name] = await pdfDoc.embedFont(fontBytes);
+        }
+      };
+
+      for (const ann of annotations) {
+        if (ann.type === "text") {
+          const txtAnn = ann as TextAnnotation;
+          if (txtAnn.fontFamily === "Roboto") await loadCustomFont("Roboto", "/fonts/Roboto-Regular.ttf");
+          else if (txtAnn.fontFamily === "Montserrat") await loadCustomFont("Montserrat", "/fonts/Montserrat-Regular.ttf");
+          else if (txtAnn.fontFamily === "Poppins") await loadCustomFont("Poppins", "/fonts/Poppins-Regular.ttf");
+        }
+      }
 
       for (const ann of annotations) {
         const pageIndex = ann.page - 1;
@@ -521,7 +549,7 @@ export default function PdfEditor() {
             x: ann.x * sx,
             y: ph - ann.y * sy - ann.fontSize * sy,
             size: ann.fontSize * sx,
-            font: helvetica,
+            font: fonts[ann.fontFamily] || fonts.Helvetica,
             color: rgb(r, g, b),
           });
         } else if (ann.type === "image") {
@@ -612,6 +640,18 @@ export default function PdfEditor() {
         {/* Text Options (visible when text tool active) */}
         {tool === "text" && (
           <div className="flex items-center gap-2">
+            <select
+              value={textFontFamily}
+              onChange={(e) => setTextFontFamily(e.target.value as "Helvetica" | "TimesRoman" | "Courier" | "Roboto" | "Montserrat" | "Poppins")}
+              className="px-2 py-1.5 rounded-lg border-3 border-black bg-white text-black font-bold text-sm max-w-[100px] truncate"
+            >
+              <option value="Helvetica">Sans</option>
+              <option value="TimesRoman">Serif</option>
+              <option value="Courier">Mono</option>
+              <option value="Roboto">Roboto</option>
+              <option value="Montserrat">Montserrat</option>
+              <option value="Poppins">Poppins</option>
+            </select>
             <select
               value={textFontSize}
               onChange={(e) => setTextFontSize(Number(e.target.value))}
@@ -761,7 +801,7 @@ export default function PdfEditor() {
                         style={{
                           fontSize: ann.fontSize,
                           color: ann.color,
-                          fontFamily: "Helvetica, Arial, sans-serif",
+                          fontFamily: ann.fontFamily === "TimesRoman" ? "Times New Roman, serif" : ann.fontFamily === "Courier" ? "Courier New, monospace" : ann.fontFamily === "Roboto" ? "'Roboto', sans-serif" : ann.fontFamily === "Montserrat" ? "'Montserrat', sans-serif" : ann.fontFamily === "Poppins" ? "'Poppins', sans-serif" : "Helvetica, Arial, sans-serif",
                         }}
                       />
                     ) : (
@@ -770,7 +810,7 @@ export default function PdfEditor() {
                         style={{
                           fontSize: ann.fontSize,
                           color: ann.color,
-                          fontFamily: "Helvetica, Arial, sans-serif",
+                          fontFamily: ann.fontFamily === "TimesRoman" ? "Times New Roman, serif" : ann.fontFamily === "Courier" ? "Courier New, monospace" : ann.fontFamily === "Roboto" ? "'Roboto', sans-serif" : ann.fontFamily === "Montserrat" ? "'Montserrat', sans-serif" : ann.fontFamily === "Poppins" ? "'Poppins', sans-serif" : "Helvetica, Arial, sans-serif",
                         }}
                       >
                         {ann.text || "(click to edit)"}

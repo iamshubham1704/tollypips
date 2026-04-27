@@ -1,8 +1,8 @@
-# 🎒 TollyPups
+# 🎒 tollypips
 
 **Your all-in-one backpack of tools. Fast, free, and unapologetically bold.**
 
-TollyPups is a collection of utilities designed specifically to turbocharge workflows for students and developers alike. Featuring a highly interactive, Neo-Brutalist design.
+tollypips is a collection of utilities designed specifically to turbocharge workflows for students and developers alike. Featuring a highly interactive, Neo-Brutalist design.
 
 ---
 
@@ -35,17 +35,20 @@ TollyPups is a collection of utilities designed specifically to turbocharge work
 ## 💻 Running Locally
 
 1. **Clone the repository:**
+
    ```bash
-   git clone https://github.com/yourusername/tollypups.git
-   cd tollypups
+   git clone https://github.com/yourusername/tollypips.git
+   cd tollypips
    ```
 
 2. **Install dependencies:**
+
    ```bash
    npm install
    ```
 
 3. **Start the development server:**
+
    ```bash
    npm run dev
    ```
@@ -57,4 +60,5 @@ TollyPups is a collection of utilities designed specifically to turbocharge work
 Contributions are always welcome! If you have an idea for a new tool that students would love, feel free to submit a Pull Request or open an Issue.
 
 ---
-*Made with ❤️ by the TollyPups Team*
+
+_Made with ❤️ by the tollypips Team_

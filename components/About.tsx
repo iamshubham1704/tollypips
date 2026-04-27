@@ -75,7 +75,7 @@ const About = () => {
                     className="text-xl md:text-2xl text-foreground/80 leading-relaxed font-medium"
                     style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
                 >
-                    TollyPups is the centralized platform designed specifically for college students.
+                    tollypips is the centralized platform designed specifically for college students.
                     Stop juggling between dozens of tabs. We bring all your daily essential tools
                     together in one seamless, lightning-fast experience.
                 </motion.p>

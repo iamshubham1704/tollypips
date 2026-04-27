@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "PDF Editor - TollyPups",
+  title: "PDF Editor - TollyPips",
   description:
     "Edit PDFs in your browser. Add text, images, and redact content — no uploads required.",
 };
