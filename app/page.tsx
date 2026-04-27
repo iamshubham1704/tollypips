@@ -2,6 +2,7 @@
 
 import About from "@/components/About";
 import Features from "@/components/Features";
+import ToolPreviews from "@/components/ToolPreviews";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import { Sparkles, ArrowRight } from "lucide-react";
@@ -71,6 +72,7 @@ export default function Home() {
 
       <About />
       <Features/>
+      <ToolPreviews/>
       <Footer/>
 
     </div>
