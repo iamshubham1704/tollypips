@@ -26,7 +26,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col relative">
         <Navbar />
-        <main className="flex-grow pt-[80px]">
+        <main className="grow pt-[80px]">
           {children}
         </main>
       </body>
