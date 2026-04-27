@@ -22,6 +22,12 @@ const tools = [
     description: 'Track attendance like a pro with real-time insights.',
     image: '/images/attendance_manager_mockup.png',
     color: 'bg-lime-400'
+  },
+  {
+    title: 'Tolly Humaniser',
+    description: 'Converts your AI articles to human language.',
+    image: '/images/tolly_humaniser_mockup.png',
+    color: 'bg-purple-400'
   }
 ];
 
@@ -78,7 +84,7 @@ const ToolPreviews = () => {
             className="text-xl md:text-2xl text-black/80 max-w-3xl mx-auto font-bold"
             style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
           >
-            Don't just take our word for it. Here is a preview of the unapologetically bold interfaces powering our tools.
+            Don&apos;t just take our word for it. Here is a preview of the unapologetically bold interfaces powering our tools.
           </motion.p>
         </motion.div>
 

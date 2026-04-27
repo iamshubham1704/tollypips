@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { BrainCircuit, FileSignature, CalendarClock, ExternalLink, Wrench, HelpCircle } from 'lucide-react';
+import { BrainCircuit, FileSignature, CalendarClock, ExternalLink, Wrench, Type } from 'lucide-react';
 
 const tools = [
   {
@@ -32,12 +32,13 @@ const tools = [
     status: 'Coming Soon',
   },
   {
-    id: 'secret-tool',
-    title: 'Mystery Tool',
-    description: 'We are cooking up something extremely helpful. Stay tuned to find out what it is!',
-    icon: HelpCircle,
+    id: 'tolly-humaniser',
+    title: 'Tolly Humaniser',
+    description: 'Converts your AI articles to human language seamlessly.',
+    icon: Type,
     color: 'bg-purple-400',
-    status: 'Revealing Soon',
+    link: '/tools/humaniser',
+    status: 'Coming Soon',
   }
 ];
 
