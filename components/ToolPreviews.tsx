@@ -18,16 +18,16 @@ const tools = [
     color: 'bg-cyan-400'
   },
   {
-    title: 'Attendance Manager',
-    description: 'Track attendance like a pro with real-time insights.',
-    image: '/images/attendance_manager_mockup.png',
-    color: 'bg-lime-400'
-  },
-  {
     title: 'Tolly Humaniser',
     description: 'Converts your AI articles to human language.',
     image: '/images/tolly_humaniser_mockup.png',
     color: 'bg-purple-400'
+  },
+  {
+    title: 'Attendance Manager',
+    description: 'Track attendance like a pro with real-time insights.',
+    image: '/images/attendance_manager_mockup.png',
+    color: 'bg-lime-400'
   }
 ];
 

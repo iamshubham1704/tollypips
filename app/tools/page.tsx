@@ -24,14 +24,6 @@ const tools = [
     status: 'Available',
   },
   {
-    id: 'attendance-manager',
-    title: 'Attendance Manager',
-    description: 'Track your university attendance with ease. Get smart predictions on how many classes you can afford to miss.',
-    icon: CalendarClock,
-    color: 'bg-green-400',
-    status: 'Coming Soon',
-  },
-  {
     id: 'tolly-humaniser',
     title: 'Tolly Humaniser',
     description: 'Converts your AI articles to human language seamlessly.',
@@ -39,6 +31,14 @@ const tools = [
     color: 'bg-purple-400',
     link: '/tools/humaniser',
     status: 'Available',
+  },
+  {
+    id: 'attendance-manager',
+    title: 'Attendance Manager',
+    description: 'Track your university attendance with ease. Get smart predictions on how many classes you can afford to miss.',
+    icon: CalendarClock,
+    color: 'bg-green-400',
+    status: 'Coming Soon',
   }
 ];
 
