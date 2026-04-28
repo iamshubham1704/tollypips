@@ -24,8 +24,8 @@ const tools = [
     color: 'bg-purple-400'
   },
   {
-    title: 'Attendance Manager',
-    description: 'Track attendance like a pro with real-time insights.',
+    title: 'Time & Attendance Manager',
+    description: 'Track work or study hours like a pro with real-time insights.',
     image: '/images/attendance_manager_mockup.png',
     color: 'bg-lime-400'
   }

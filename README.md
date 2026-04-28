@@ -2,7 +2,7 @@
 
 **Your all-in-one backpack of tools. Fast, free, and unapologetically bold.**
 
-tollypips is a collection of utilities designed specifically to turbocharge workflows for students and developers alike. Featuring a highly interactive, Neo-Brutalist design.
+tollypips is a collection of utilities designed specifically to turbocharge workflows for professionals and students alike. Featuring a highly interactive, Neo-Brutalist design.
 
 ---
 
@@ -22,8 +22,11 @@ tollypips is a collection of utilities designed specifically to turbocharge work
    - A fully-featured, lightning-fast PDF editor built directly into your browser. No server uploads required—your documents never leave your device.
    - **Features include:** Add and edit text with custom Google Fonts (Roboto, Montserrat, Poppins), insert and resize images, redact content with a white-out tool, full Undo/Redo history tracking, and mobile touch support including pinch-to-zoom scaling.
 
-3. **Attendance Manager** _(Coming Soon)_
-   - Track your university attendance with ease. Get smart predictions on how many classes you can afford to miss.
+3. **Tolly Humaniser**
+   - Converts your AI-generated articles into natural, conversational human language.
+
+4. **Time & Attendance Manager** _(Coming Soon)_
+   - Track your work or study hours with ease. Get smart insights and manage your schedule effortlessly.
 
 ## 🚀 Tech Stack
 
@@ -33,6 +36,7 @@ tollypips is a collection of utilities designed specifically to turbocharge work
 - **Animations:** Framer Motion
 - **Icons:** Lucide React
 - **PDF Engine:** pdf-lib, react-pdf, and @pdf-lib/fontkit
+- **Analytics:** Vercel Analytics
 
 ## 💻 Running Locally
 
@@ -59,8 +63,8 @@ tollypips is a collection of utilities designed specifically to turbocharge work
 
 ## 🤝 Contributing
 
-Contributions are always welcome! If you have an idea for a new tool that students would love, feel free to submit a Pull Request or open an Issue.
+Contributions are always welcome! If you have an idea for a new tool that professionals or students would love, feel free to submit a Pull Request or open an Issue.
 
 ---
 
-_Made with ❤️ by the tollypips Team_
+_Made with ❤️_

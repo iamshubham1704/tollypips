@@ -34,8 +34,8 @@ const tools = [
   },
   {
     id: 'attendance-manager',
-    title: 'Attendance Manager',
-    description: 'Track your university attendance with ease. Get smart predictions on how many classes you can afford to miss.',
+    title: 'Time & Attendance Manager',
+    description: 'Track your work or study hours with ease. Get smart insights and manage your schedule effortlessly.',
     icon: CalendarClock,
     color: 'bg-green-400',
     status: 'Coming Soon',

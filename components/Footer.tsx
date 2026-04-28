@@ -99,7 +99,7 @@ const Footer = () => {
             © {new Date().getFullYear()} TollyPips. All rights reserved.
           </p>
           <div className="flex items-center gap-2 text-lg font-bold text-foreground/80 bg-green-400/20 px-4 py-2 rounded-xl border-2 border-foreground border-dashed">
-            Made with <Heart className="text-red-500 fill-red-500 animate-pulse" size={20} /> by TollyPips Team
+            Made with <Heart className="text-red-500 fill-red-500 animate-pulse" size={20} />
           </div>
         </div>
       </div>

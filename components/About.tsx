@@ -18,20 +18,20 @@ const features = [
     },
     {
         icon: Calculator,
-        title: "Academic Calcs",
-        description: "Quickly calculate your GPA, grades, and manage course credits.",
+        title: "Utility Calcs",
+        description: "Quickly calculate metrics, finances, and manage your daily tasks.",
         color: "bg-blue-400"
     },
     {
         icon: Clock,
         title: "Productivity",
-        description: "AI tools for students for increasing productivity.",
+        description: "AI tools designed to skyrocket your workflow and productivity.",
         color: "bg-orange-400"
     },
     {
         icon: BookOpen,
-        title: "Study Hub",
-        description: "Access shared notes, flashcards, and quick revision materials.",
+        title: "Resource Hub",
+        description: "Access shared templates, assets, and quick reference materials.",
         color: "bg-purple-400"
     }
 ];
@@ -75,7 +75,7 @@ const About = () => {
                     className="text-xl md:text-2xl text-foreground/80 leading-relaxed font-medium"
                     style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
                 >
-                    tollypips is the centralized platform designed specifically for college students.
+                    tollypips is the centralized platform designed for professionals and students alike.
                     Stop juggling between dozens of tabs. We bring all your daily essential tools
                     together in one seamless, lightning-fast experience.
                 </motion.p>

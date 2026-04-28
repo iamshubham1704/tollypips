@@ -12,7 +12,7 @@ const bangersFont = Bangers({
 
 export const metadata: Metadata = {
   title: "TollyPips - Ultimate Tools",
-  description: "The ultimate tools bagpack for college students.",
+  description: "The ultimate tools backpack for professionals and students.",
 };
 
 export default function RootLayout({
