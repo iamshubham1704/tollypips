@@ -38,7 +38,7 @@ const tools = [
     icon: Type,
     color: 'bg-purple-400',
     link: '/tools/humaniser',
-    status: 'Coming Soon',
+    status: 'Available',
   }
 ];
 

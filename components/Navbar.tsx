@@ -1,8 +1,17 @@
+"use client";
+
 import React from 'react'
 import Link from 'next/link'
 import DonateButton from './DonateButton'
+import { usePathname } from 'next/navigation'
 
 const Navbar = () => {
+    const pathname = usePathname();
+
+    if (pathname === '/tools/humaniser') {
+        return null;
+    }
+
     return (
         <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-black dark:bg-black border-4 border-foreground shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] py-3 px-8 rounded-full transition-all duration-300 w-max">
             <ul className='flex items-center gap-6 text-[20px] font-black uppercase tracking-wider text-white'>
