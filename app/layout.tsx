@@ -3,6 +3,7 @@ import { Bangers } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { Analytics } from "@vercel/analytics/react";
+import DonateButton from "@/components/DonateButton";
 
 const bangersFont = Bangers({
   weight: "400",
@@ -30,6 +31,7 @@ export default function RootLayout({
         <main className="grow pt-[80px]">
           {children}
         </main>
+        <DonateButton />
         <Analytics />
       </body>
     </html>

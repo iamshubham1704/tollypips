@@ -19,9 +19,9 @@ const DonateButton = () => {
                     <X size={20} strokeWidth={3} />
                 </button>
                 
-                <h2 className="text-3xl font-black uppercase mb-2 text-center mt-2 text-black" style={{ fontFamily: 'var(--font-bangers)' }}>Fuel the Code!</h2>
+                <h2 className="text-3xl font-black uppercase mb-2 text-center mt-2 text-black" style={{ fontFamily: 'var(--font-bangers)' }}>Support Us!</h2>
                 <p className="text-center font-bold mb-6 text-gray-700 text-[16px] font-sans max-w-[280px]">
-                    For building more tools, your small contribution means a lot! ❤️
+                    If you like our design, tools, or anything about the website, your small contribution means a lot! ❤️
                 </p>
                 
                 <div className="bg-[#00BAF2] p-4 rounded-xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] w-full flex flex-col items-center">
@@ -46,10 +46,10 @@ const DonateButton = () => {
         <>
             <button 
                 onClick={() => setIsOpen(true)}
-                className="bg-red-400 text-black px-4 py-1.5 border-2 border-black rounded-full hover:-translate-y-1 hover:drop-shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-2 font-black uppercase tracking-wider text-[16px] leading-none ml-2"
+                className="fixed bottom-6 right-6 z-50 bg-red-400 text-black p-4 border-4 border-black rounded-full hover:-translate-y-2 hover:drop-shadow-[4px_4px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center group shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.9)]"
+                title="Support Us"
             >
-                <Heart size={16} strokeWidth={3} className="fill-black" />
-                Support Us
+                <Heart size={28} strokeWidth={3} className="fill-black group-hover:scale-110 transition-transform animate-pulse" />
             </button>
 
             {isOpen && createPortal(modal, document.body)}
