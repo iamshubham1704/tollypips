@@ -24,6 +24,12 @@ const tools = [
     color: 'bg-purple-400'
   },
   {
+    title: 'Regex Generator',
+    description: 'Generate regular expressions from plain English or explain what complex ones do.',
+    image: '/images/regex_generator_mockup.png',
+    color: 'bg-orange-400'
+  },
+  {
     title: 'Time & Attendance Manager',
     description: 'Track work or study hours like a pro with real-time insights.',
     image: '/images/attendance_manager_mockup.png',

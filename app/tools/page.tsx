@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { BrainCircuit, FileSignature, CalendarClock, ExternalLink, Wrench, Type } from 'lucide-react';
+import { BrainCircuit, FileSignature, CalendarClock, ExternalLink, Wrench, Type, Code } from 'lucide-react';
 
 const tools = [
   {
@@ -30,6 +30,15 @@ const tools = [
     icon: Type,
     color: 'bg-purple-400',
     link: '/tools/humaniser',
+    status: 'Available',
+  },
+  {
+    id: 'regex-generator',
+    title: 'Regex Generator',
+    description: 'Generate regular expressions from plain English or explain what complex ones do.',
+    icon: Code,
+    color: 'bg-orange-400',
+    link: '/tools/regex-generator',
     status: 'Available',
   },
   {
