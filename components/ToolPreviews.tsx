@@ -30,6 +30,12 @@ const tools = [
     color: 'bg-orange-400'
   },
   {
+    title: 'SQL Query Generator',
+    description: 'Describe the data you want in English and get paste-ready SQL with sensible assumptions.',
+    image: '/images/sql_query_generator_mockup.png',
+    color: 'bg-emerald-400'
+  },
+  {
     title: 'Time & Attendance Manager',
     description: 'Track work or study hours like a pro with real-time insights.',
     image: '/images/attendance_manager_mockup.png',

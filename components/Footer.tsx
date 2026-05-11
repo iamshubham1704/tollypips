@@ -64,7 +64,7 @@ const Footer = () => {
               {['Home', 'About', 'Tools', 'Pricing'].map((link, index) => (
                 <li key={index}>
                   <Link 
-                    href={link === 'Home' ? '/' : link === 'About' ? '/#about' : `/${link.toLowerCase()}`}
+                    href={link === 'Home' ? '/' : link === 'About' ? '/about' : `/${link.toLowerCase()}`}
                     className="text-lg font-bold text-foreground/70 hover:text-foreground hover:underline decoration-4 underline-offset-4 decoration-pink-400 transition-all uppercase tracking-wide"
                   >
                     {link}

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { BrainCircuit, FileSignature, CalendarClock, ExternalLink, Wrench, Type, Code } from 'lucide-react';
+import { BrainCircuit, FileSignature, CalendarClock, ExternalLink, Wrench, Type, Code, Database } from 'lucide-react';
 
 const tools = [
   {
@@ -39,6 +39,15 @@ const tools = [
     icon: Code,
     color: 'bg-orange-400',
     link: '/tools/regex-generator',
+    status: 'Available',
+  },
+  {
+    id: 'sql-query-generator',
+    title: 'SQL Query Generator',
+    description: 'Turn plain English into ready-to-run SQL — filters, joins, aggregates, and date logic.',
+    icon: Database,
+    color: 'bg-emerald-400',
+    link: '/tools/sql-query-generator',
     status: 'Available',
   },
   {

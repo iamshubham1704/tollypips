@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { motion, Variants } from 'framer-motion';
 import {
     Calculator,
@@ -117,6 +118,20 @@ const About = () => {
                         </p>
                     </motion.div>
                 ))}
+            </motion.div>
+
+            <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="mt-16 text-center"
+            >
+                <Link
+                    href="/about"
+                    className="inline-flex items-center gap-2 bg-foreground text-background px-8 py-4 rounded-xl border-4 border-foreground text-lg font-black uppercase tracking-widest shadow-[6px_6px_0px_0px_rgba(52,211,153,1)] hover:translate-y-0.5 hover:shadow-[4px_4px_0px_0px_rgba(52,211,153,1)] transition-all"
+                >
+                    Read the full about page
+                </Link>
             </motion.div>
         </section>
     );
