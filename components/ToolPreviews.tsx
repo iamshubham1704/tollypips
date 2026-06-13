@@ -36,6 +36,12 @@ const tools = [
     color: 'bg-emerald-400'
   },
   {
+    title: 'Mail-N-End',
+    description: 'Run hyper-personalized cold email campaigns and track live deliverability metrics.',
+    image: '/images/mail_n_end_mockup.png',
+    color: 'bg-blue-400'
+  },
+  {
     title: 'Time & Attendance Manager',
     description: 'Track work or study hours like a pro with real-time insights.',
     image: '/images/attendance_manager_mockup.png',

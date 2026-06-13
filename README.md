@@ -25,7 +25,10 @@ tollypips is a collection of utilities designed specifically to turbocharge work
 3. **Tolly Humaniser**
    - Converts your AI-generated articles into natural, conversational human language.
 
-4. **Time & Attendance Manager** _(Coming Soon)_
+4. **[Mail-N-End](https://mainn-end.vercel.app/)**
+   - A cold email campaign manager with dynamic variables, personalized scheduling, and deliverability performance tracking.
+
+5. **Time & Attendance Manager** _(Coming Soon)_
    - Track your work or study hours with ease. Get smart insights and manage your schedule effortlessly.
 
 ## 🚀 Tech Stack

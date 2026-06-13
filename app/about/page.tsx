@@ -17,6 +17,7 @@ import {
   Database,
   BrainCircuit,
   CalendarClock,
+  Mail,
 } from "lucide-react";
 
 const fadeUp = {
@@ -69,6 +70,15 @@ const toolsDetailed = [
     color: "bg-yellow-400",
     summary:
       "A separate project: a browser extension idea built around saving, compressing, and moving AI chat context between tools. It is for people who live in multiple assistants and want less copy-paste friction.",
+  },
+  {
+    title: "Mail-N-End",
+    href: "https://mainn-end.vercel.app/",
+    external: true,
+    icon: Mail,
+    color: "bg-blue-400",
+    summary:
+      "A specialized cold email outreach platform for staging and managing personalized campaigns. Import contacts, customize templates with variables, and track your overall sending performance and metrics.",
   },
   {
     title: "Time & Attendance Manager",

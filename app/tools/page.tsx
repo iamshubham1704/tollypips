@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { BrainCircuit, FileSignature, CalendarClock, ExternalLink, Wrench, Type, Code, Database } from 'lucide-react';
+import { BrainCircuit, FileSignature, CalendarClock, ExternalLink, Wrench, Type, Code, Database, Mail } from 'lucide-react';
 
 const tools = [
   {
@@ -48,6 +48,15 @@ const tools = [
     icon: Database,
     color: 'bg-emerald-400',
     link: '/tools/sql-query-generator',
+    status: 'Available',
+  },
+  {
+    id: 'mail-n-end',
+    title: 'Mail-N-End',
+    description: 'Send cold email outreach campaigns with dynamic variables, personalized scheduling, and clean deliverability metrics.',
+    icon: Mail,
+    color: 'bg-blue-400',
+    link: 'https://mainn-end.vercel.app/',
     status: 'Available',
   },
   {
